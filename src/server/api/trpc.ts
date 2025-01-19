@@ -14,6 +14,7 @@ import { getAuth } from '@clerk/nextjs/server'
 
 import { db } from "@/server/db";
 import { env } from "process";
+import { RequestCookies } from "next/dist/server/web/spec-extension/cookies";
 
 /**
  * 1. CONTEXT
@@ -28,7 +29,10 @@ import { env } from "process";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const { userId } = getAuth({ headers: opts.headers }, {
+  // @ts-ignore
+  const { userId } = getAuth({
+    headers: opts.headers,
+  }, {
     secretKey: env.CLERK_SECRET_KEY
   }
   );

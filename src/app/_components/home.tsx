@@ -34,7 +34,7 @@ export const HomePage = () => {
 
   useEffect(() => {
     if (!isLoading && isFetched) {
-      if (!user || !user.birthDate) {
+      if (!user?.birthDate) {
         router.push('/onboarding')
       }
     }
@@ -81,7 +81,7 @@ export const HomePage = () => {
             <CardTitle>Welcome!</CardTitle>
             <UserButton afterSignOutUrl="/" />
           </div>
-          <CardDescription>Each dot symbolizes a week of your life, marking the journey you've traveled and the path ahead</CardDescription>
+          <CardDescription>Each dot symbolizes a week of your life, marking the journey you have traveled and the path ahead</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="w-full gap-6 rounded-lg flex flex-col">

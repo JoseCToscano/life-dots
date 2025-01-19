@@ -1,14 +1,13 @@
 "use client";
-import { useEffect } from "react";
 import useMouseMove from "@/hooks/useMouseMove";
 import type { ReactNode } from "react";
-import "./background.css"; 
+import "./background.css";
 
 interface BackgroundProps {
-    children: ReactNode;
-    animateDots?: boolean;
-  }
-  
+  children: ReactNode;
+  animateDots?: boolean;
+}
+
 
 export default function Background({ children, animateDots }: BackgroundProps) {
   // --x and --y will be updated based on mouse position

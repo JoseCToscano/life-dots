@@ -86,8 +86,8 @@ function JournalComponent({ weekData, weekNumber }: { weekData: Week | null | un
     onError(error, variables, context) {
       toast.error('Failed to save journal entry')
       // Revert optimistic update on error
-      if (context?.previousData) {
-        ctx.weeks.getWeek.setData({ weekNumber }, context.previousData)
+      if ((context as any)?.previousData) {
+        ctx.weeks.getWeek.setData({ weekNumber }, (context as any).previousData)
       }
     },
     onSuccess(data, variables, context) {
@@ -103,7 +103,13 @@ function JournalComponent({ weekData, weekNumber }: { weekData: Week | null | un
       // Optimistically update the UI
       ctx.weeks.getWeek.setData({ weekNumber }, (old) => ({
         ...old,
+        id: old?.id ?? 0,
+        weekNumber,
         journalText,
+        reminders: old?.reminders ?? null,
+        userId: old?.userId ?? '',
+        createdAt: old?.createdAt ?? new Date(),
+        updatedAt: old?.updatedAt ?? new Date(),
       }))
 
       return { previousData }
@@ -191,8 +197,8 @@ function ReminderComponent({ weekData, weekNumber }: { weekData: Week | null | u
   const { mutate: updateReminders, isPending: isLoading } = api.weeks.updateReminders.useMutation({
     onError(error, variables, context) {
       toast.error('Failed to save reminders')
-      if (context?.previousData) {
-        ctx.weeks.getWeek.setData({ weekNumber }, context.previousData)
+      if ((context as any)?.previousData) {
+        ctx.weeks.getWeek.setData({ weekNumber }, (context as any).previousData)
       }
     },
     onSuccess() {
@@ -205,6 +211,12 @@ function ReminderComponent({ weekData, weekNumber }: { weekData: Week | null | u
       ctx.weeks.getWeek.setData({ weekNumber }, (old) => ({
         ...old,
         reminders,
+        id: old?.id ?? 0,
+        weekNumber,
+        journalText: old?.journalText ?? null,
+        userId: old?.userId ?? '',
+        createdAt: old?.createdAt ?? new Date(),
+        updatedAt: old?.updatedAt ?? new Date(),
       }))
       return { previousData }
     },

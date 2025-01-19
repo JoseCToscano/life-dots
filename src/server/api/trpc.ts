@@ -10,9 +10,10 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { getAuth } from '@clerk/nextjs/server'
 
-import { auth } from "@/server/auth";
 import { db } from "@/server/db";
+import { env } from "process";
 
 /**
  * 1. CONTEXT
@@ -27,11 +28,14 @@ import { db } from "@/server/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await auth();
+  const { userId } = getAuth({ headers: opts.headers }, {
+    secretKey: env.CLERK_SECRET_KEY
+  }
+  );
 
   return {
     db,
-    session,
+    userId,
     ...opts,
   };
 };
@@ -118,16 +122,15 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure
-  .use(timingMiddleware)
-  .use(({ ctx, next }) => {
-    if (!ctx.session || !ctx.session.user) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-    return next({
-      ctx: {
-        // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session.user },
-      },
-    });
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.userId) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      userId: ctx.userId,
+    },
   });
+});
+
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);

@@ -1,0 +1,16 @@
+{
+    "extends": [
+        // ... other extends
+    ],
+    "rules": {
+        "react/no-unescaped-entities": [
+            "warn",
+            {
+                "forbid": [
+                    ">",
+                    "}"
+                ]
+            }
+        ]
+    }
+}

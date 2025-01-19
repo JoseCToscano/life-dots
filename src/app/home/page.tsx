@@ -6,6 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LifeDots } from "./components/life-dots"
+import { addYears, differenceInWeeks } from "date-fns"
+
+function getWeeksLived(birthDate: Date) {
+  const today = new Date();
+  const weeksLived = differenceInWeeks(today, birthDate);
+  return weeksLived;
+}
+
+function getWeeksRemaining(birthDate: Date) {
+  const today = new Date();
+  const weeksRemaining = differenceInWeeks(addYears(birthDate, 90), today);
+  return weeksRemaining;
+}
 
 // Assuming a maximum lifespan of 90 years
 const WEEKS_IN_LIFE = 52 * 90
@@ -14,8 +27,9 @@ export default function HomePage() {
   const [age, setAge] = useState(25) // Default age, replace with actual user data
   const [lifeExpectancy, setLifeExpectancy] = useState(80) // Default life expectancy
 
-  const weeksLived = age * 52
-  const weeksRemaining = (lifeExpectancy - age) * 52
+  const birthDate = new Date("1998-10-02");
+  const weeksLived = getWeeksLived(birthDate);
+  const weeksRemaining = getWeeksRemaining(birthDate);
 
   useEffect(() => {
     // Here you would typically fetch the user's actual age from your backend
@@ -32,7 +46,7 @@ export default function HomePage() {
         <CardContent>
           <div className="w-full gap-6 px-20 rounded-lg flex flex-col">
 
-            <LifeDots weeksLived={weeksLived} weeksRemaining={weeksRemaining} totalWeeks={WEEKS_IN_LIFE} />
+            <LifeDots weeksLived={weeksLived} weeksRemaining={weeksRemaining} totalWeeks={WEEKS_IN_LIFE} birthDate={new Date("1998-10-02")} />
             </div>
         </CardContent>
       </Card>

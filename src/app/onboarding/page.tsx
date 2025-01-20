@@ -11,13 +11,14 @@ import { toast } from "react-hot-toast"
 import { useAuth } from "@clerk/nextjs"
 
 export default function OnboardingPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [dateOfBirth, setDateOfBirth] = useState("")
   const router = useRouter()
   const { isLoaded, isSignedIn } = useAuth()
-  const { mutate: updateBirthdate, isPending: isLoading } = api.user.updateBirthdate.useMutation({
-    onSuccess: () => {
+  const ctx = api.useContext()
+  const { mutateAsync: updateBirthdate, isPending: isLoading } = api.user.updateBirthdate.useMutation({
+    onSuccess: async () => {
       toast.success("Welcome to Life in Dots!")
-      router.push("/")
     },
     onError: (error) => {
       toast.error(error.message)
@@ -40,9 +41,20 @@ export default function OnboardingPage() {
   minDate.setFullYear(minDate.getFullYear() - 120)
   const minDateString = minDate.toISOString().split('T')[0]
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    updateBirthdate({ birthdate: dateOfBirth })
+    setIsSubmitting(true)
+    try {
+      await updateBirthdate({ birthdate: dateOfBirth })
+      ctx.user.getUser.setData(undefined, { birthDate: new Date(dateOfBirth), id: '' })
+      await ctx.user.getUser.invalidate()
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      router.push("/")
+    } catch (e) {
+      toast.error("Something went wrong. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // If auth is still loading or user is not signed in, don't show the form
@@ -75,8 +87,8 @@ export default function OnboardingPage() {
                 This helps us visualize your life journey
               </p>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Continue"}
+            <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
+              {(isLoading || isSubmitting) ? "Saving..." : "Continue"}
             </Button>
           </form>
         </CardContent>

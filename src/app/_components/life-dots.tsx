@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import { motion } from 'framer-motion'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Sheet, SheetContent, SheetDescription, SheetHeader } from '@/components/ui/sheet'
@@ -17,6 +17,7 @@ import { api } from '@/trpc/react'
 import { toast } from 'react-hot-toast'
 import { Week } from '@prisma/client'
 import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 
 interface LifeDotsProps {
@@ -317,6 +318,10 @@ function buildDotWithTooltip(index: number, props: {
 }) {
   const weekInsight = recomendations[String(index)] || null
 
+  console.log('weekInsight', weekInsight)
+  console.log('startDate', props.startDate)
+  console.log('endDate', props.endDate)
+
   return (
     <TooltipProvider key={index}>
       <Tooltip>
@@ -370,6 +375,18 @@ export const LifeDots: React.FC<LifeDotsProps> = ({ weeksLived, weeksRemaining, 
   const [selectedWeek, setSelectedWeek] = useState<WeekDetails | null>(null)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
 
+  const router = useRouter()
+
+  useEffect(() => {
+    console.log('weeksLived', weeksLived)
+    console.log('weeksRemaining', weeksRemaining)
+    console.log('totalWeeks', totalWeeks)
+    console.log('birthDate', birthDate)
+    if (!birthDate) {
+      router.push('/onboarding')
+    }
+  }, [weeksLived, weeksRemaining, totalWeeks, birthDate])
+
   // Only query when sheet is open and we have a selected week
   const { data: weekData, isFetching, isLoading: isWeekDataLoading } = api.weeks.getWeek.useQuery(
     { weekNumber: selectedWeek?.weekNumber ?? 0 },
@@ -410,6 +427,10 @@ export const LifeDots: React.FC<LifeDotsProps> = ({ weeksLived, weeksRemaining, 
     return 1 + Math.exp(-distance / 5) * 0.5
   }
 
+  if (!birthDate) {
+    return null
+  }
+
   return (
     <div>
       <div className="grid auto-rows-fr gap-0.5 sm:gap-0.5" style={{
@@ -418,7 +439,9 @@ export const LifeDots: React.FC<LifeDotsProps> = ({ weeksLived, weeksRemaining, 
         aspectRatio: '52/90'
       }}>
         {Array.from({ length: totalWeeks }).map((_, index) => {
+          console.log('birthDate', birthDate, typeof birthDate, JSON.stringify(birthDate))
           const weekStartDate = addWeeks(birthDate, index)
+          console.log('weekStartDate', weekStartDate)
           const weekStart = startOfWeek(weekStartDate)
           const weekEnd = endOfWeek(weekStartDate)
           return buildDotWithTooltip(index, {

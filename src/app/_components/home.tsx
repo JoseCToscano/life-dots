@@ -34,15 +34,18 @@ export const HomePage = () => {
 
   useEffect(() => {
     if (!isLoading && isFetched) {
+      console.log('user fetched:', user);
       if (!user?.birthDate) {
         router.push('/onboarding')
+      } else {
+        router.push('/')
       }
     }
   }, [user, router, isLoading, isFetched])
 
 
 
-  if (isLoading) {
+  if (isLoading || !isFetched || !user?.birthDate) {
     return (
       <div className="min-h-screen">
         <InstructionsBanner />
@@ -67,6 +70,7 @@ export const HomePage = () => {
   if (!user) {
     return null
   }
+
 
   const birthDate = new Date(String(user?.birthDate));
   const weeksLived = getWeeksLived(birthDate);
